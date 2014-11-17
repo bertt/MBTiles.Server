@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Web.Hosting;
 using System.Web.Http;
 using MBTilesServer.Models;
 
@@ -17,10 +18,12 @@ namespace MBTilesServer.Controllers
         {
             var mbtilefile = ConfigurationManager.AppSettings["MBTileFile"];
 
-            if(mbtilefile.Contains("{level}"))
+            if (mbtilefile.Contains("{level}"))
             {
                 mbtilefile = mbtilefile.Replace("{level}", level);
             }
+
+            mbtilefile= HostingEnvironment.MapPath("~/App_Data/" + mbtilefile);
 
             var image = GetTileImage(mbtilefile, level, col, row);
 
