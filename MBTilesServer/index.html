@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+
+</head>
+<body>
+    <h2>MBTileserver demo</h2>
+
+    <h3>.1 getTile request</h3>
+    <a href="3/7/2.png">Get a tile from mbtiles</a><br />
+    <br />
+    <h3>.2 leaflet demo</h3>
+    <div id="map" style="width: 1600px; height: 1000px"></div>
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+    <script>
+            var map = L.map('map').setView([38.82259, -2.8125], 3);
+
+            L.tileLayer('{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                tms: true
+            }).addTo(map);
+
+    </script>
+
+</body>
+</html>
