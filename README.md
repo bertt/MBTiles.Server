@@ -1,6 +1,2 @@
 MBTiles.Server
 ==============
-
-Serves MBTiles
-
-
