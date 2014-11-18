@@ -7,21 +7,20 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Hosting;
 using System.Web.Http;
-using MBTilesServer.Models;
+using MBTiles.Provider;
 
 namespace MBTilesServer.Controllers
 {
     public class TileController:ApiController
     {
         [Route("{level:int:min(0)}/{col:int:min(0)}/{row:int:min(0)}.{ext}")]
-        public HttpResponseMessage GetTile(string level, int col, int row,string ext)
+        [Route("{mbtiles}/{level:int:min(0)}/{col:int:min(0)}/{row:int:min(0)}.{ext}")]
+        public HttpResponseMessage GetTile(string level, int col, int row,string ext,string mbtiles=null)
         {
-            var mbtilefile = ConfigurationManager.AppSettings["MBTileFile"];
+            var mbtileExtension = ConfigurationManager.AppSettings["mbtileExtension"];
+            var mbtilefile = mbtiles == null ? level + "." + mbtileExtension : mbtiles + "." + mbtileExtension;
 
-            if (mbtilefile.Contains("{level}"))
-            {
-                mbtilefile = mbtilefile.Replace("{level}", level);
-            }
+            // todo make split
 
             mbtilefile= HostingEnvironment.MapPath("~/App_Data/" + mbtilefile);
 
@@ -58,6 +57,5 @@ namespace MBTilesServer.Controllers
             httpResponseMessage.StatusCode = HttpStatusCode.OK;
             return httpResponseMessage;
         }
-
     }
 }

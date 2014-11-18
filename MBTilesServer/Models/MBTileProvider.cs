@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace MBTilesServer.Models
+namespace MBTiles.Provider
 {
     public class MBTileProvider
     {
@@ -35,6 +35,5 @@ namespace MBTilesServer.Models
             connection.Close();
             return image;
         }
-
     }
 }
