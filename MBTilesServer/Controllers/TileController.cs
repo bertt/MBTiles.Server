@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -18,11 +19,19 @@ namespace MBTilesServer.Controllers
         public HttpResponseMessage GetTile(string level, int col, int row,string ext,string mbtiles=null)
         {
             var mbtileExtension = ConfigurationManager.AppSettings["mbtileExtension"];
-            var mbtilefile = mbtiles == null ? level + "." + mbtileExtension : mbtiles + "." + mbtileExtension;
+            string mbtilefile;
 
-            // todo make split
-
-            mbtilefile= HostingEnvironment.MapPath("~/App_Data/" + mbtilefile);
+            if (mbtiles == null)
+            {
+                var mbtiledirectory = ConfigurationManager.AppSettings["mbtiledirectory"];
+                mbtilefile = mbtiledirectory + level + "." + mbtileExtension;
+            }
+            else
+            {
+                mbtilefile = mbtiles + "." + mbtileExtension;
+               // mbtilefile = HostingEnvironment.MapPath("~/App_Data/" + mbtilefile);
+                mbtilefile = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + @"\" + mbtilefile;
+            }
 
             var image = GetTileImage(mbtilefile, level, col, row);
 
@@ -35,7 +44,7 @@ namespace MBTilesServer.Controllers
                 const string contentType = "image/png";
                 return GetHttpResponseMessage(memoryStream.ToArray(), contentType, HttpStatusCode.OK);
             }
-            return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
+            return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound, ReasonPhrase = "file not found?" + mbtilefile};
         }
 
         private Image GetTileImage(string mbtilefile, string level, int col, int row)
@@ -43,7 +52,7 @@ namespace MBTilesServer.Controllers
             if (File.Exists(mbtilefile))
             {
                 var connectionString = string.Format("Data Source={0}", mbtilefile);
-                var mbTileProvider = new MBTileProvider(connectionString);
+                var mbTileProvider = new MbTileProvider(connectionString);
                 var image = mbTileProvider.GetTile(level, col, row);
                 return image;
             }
