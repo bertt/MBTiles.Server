@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -21,6 +20,8 @@ namespace MBTilesServer.Controllers
         {
             var app = HttpContext.Current.Request.ApplicationPath;
             var physicalPath = HttpContext.Current.Request.MapPath(app);
+             if (!physicalPath.EndsWith(@"\")) physicalPath+= @"\";
+
             var mbtileExtension = ConfigurationManager.AppSettings["mbtileExtension"];
             // first read the config file
             var mbtileconfig = ConfigurationManager.AppSettings["MBTileConfig"];
