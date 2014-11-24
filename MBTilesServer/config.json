@@ -1,0 +1,9 @@
+﻿{
+    "tilesets": [
+        { "id": "cities", "source": "app_data/cities.mbtile", "type":  "file" },
+        { "id": "countries", "source": "app_data/countries.mbtile", "type": "file" },
+        { "id": "countries_local", "source": "C:/inetpub/wwwroot/tiles/App_Data/countries.mbtile", "type": "file" },
+        { "id": "nlgrid", "source": "E:/gisdata/nlgrid/", "type": "dir" },
+        { "id": "nlgrid1", "source": "app_data/nlgrid1/", "type": "dir" }
+    ]
+}

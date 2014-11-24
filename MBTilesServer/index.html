@@ -9,7 +9,7 @@
     <h2>MBTileserver demo</h2>
 
     <h3>.1 getTile request</h3>
-    <a href="0/0/0.png">Get a tile from mbtiles</a><br />
+    <a href="countries/0/0/0.png">Get a tile from mbtiles</a><br />
     <br />
     <h3>.2 leaflet demo</h3>
     <div id="map" style="width: 1600px; height: 1000px"></div>
@@ -18,7 +18,7 @@
     <script>
             var map = L.map('map').setView([38.82259, -2.8125], 3);
 
-            L.tileLayer('countries/{z}/{x}/{y}.png', {
+            L.tileLayer('cities/{z}/{x}/{y}.png', {
                 maxZoom: 18,
                 tms: true
             }).addTo(map);

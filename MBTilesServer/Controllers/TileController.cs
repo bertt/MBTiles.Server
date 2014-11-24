@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -6,45 +7,89 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Hosting;
+using System.Web;
 using System.Web.Http;
 using MBTiles.Provider;
+using Newtonsoft.Json;
 
 namespace MBTilesServer.Controllers
 {
     public class TileController:ApiController
     {
-        [Route("{level:int:min(0)}/{col:int:min(0)}/{row:int:min(0)}.{ext}")]
-        [Route("{mbtiles}/{level:int:min(0)}/{col:int:min(0)}/{row:int:min(0)}.{ext}")]
-        public HttpResponseMessage GetTile(string level, int col, int row,string ext,string mbtiles=null)
+        [Route("{id}/{level:int:min(0)}/{col:int:min(0)}/{row:int:min(0)}.{ext}")]
+        public HttpResponseMessage GetTile(string id,string level, int col, int row,string ext)
         {
+            var app = HttpContext.Current.Request.ApplicationPath;
+            var physicalPath = HttpContext.Current.Request.MapPath(app);
             var mbtileExtension = ConfigurationManager.AppSettings["mbtileExtension"];
-            string mbtilefile;
-
-            if (mbtiles == null)
+            // first read the config file
+            var mbtileconfig = ConfigurationManager.AppSettings["MBTileConfig"];
+            var conf = LoadJson(physicalPath + mbtileconfig);
+            var tileset = GetTileSetFromConfig(conf,id);
+            if (tileset != null)
             {
-                var mbtiledirectory = ConfigurationManager.AppSettings["mbtiledirectory"];
-                mbtilefile = mbtiledirectory + level + "." + mbtileExtension;
+                var mbtilefile = GetMbTileFile(tileset,level,mbtileExtension);
+
+                if (mbtilefile != null)
+                {
+                    var image = GetTileImage(mbtilefile, level, col, row);
+
+                    if (image != null)
+                    {
+                        var memoryStream = new MemoryStream();
+                        var imageFormat = ImageFormat.Png;
+
+                        image.Save(memoryStream, imageFormat);
+                        const string contentType = "image/png";
+                        return GetHttpResponseMessage(memoryStream.ToArray(), contentType, HttpStatusCode.OK);
+                    }
+                    return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound, ReasonPhrase = "image not found in mbtile" + mbtilefile };
+                }
             }
-            else
+            return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound, ReasonPhrase = "tileset not found in config: " + id};
+        }
+
+
+        private string GetMbTileFile(dynamic tileset,string level, string mbtileExtension)
+        {
+            var mbtilefile = (string)tileset.source;
+            if (mbtilefile.Contains("app_data"))
             {
-                mbtilefile = mbtiles + "." + mbtileExtension;
-               // mbtilefile = HostingEnvironment.MapPath("~/App_Data/" + mbtilefile);
-                mbtilefile = AppDomain.CurrentDomain.GetData("DataDirectory").ToString() + @"\" + mbtilefile;
+                mbtilefile = mbtilefile.Replace("app_data", AppDomain.CurrentDomain.GetData("DataDirectory").ToString());
             }
 
-            var image = GetTileImage(mbtilefile, level, col, row);
-
-            if (image != null)
+            if (tileset.type == "dir")
             {
-                var memoryStream = new MemoryStream();
-                var imageFormat = ImageFormat.Png;
-
-                image.Save(memoryStream, imageFormat);
-                const string contentType = "image/png";
-                return GetHttpResponseMessage(memoryStream.ToArray(), contentType, HttpStatusCode.OK);
+                mbtilefile += level + "." + mbtileExtension;
             }
-            return new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound, ReasonPhrase = "file not found?" + mbtilefile};
+
+            return mbtilefile;
+        }
+
+
+        internal dynamic GetTileSetFromConfig(dynamic conf, string id)
+        {
+            var p1 = conf.tilesets;
+            foreach (var t in p1)
+            {
+                if (t.id == id)
+                {
+                    return t;
+                }
+            }
+            return null;
+        }
+
+
+        public dynamic LoadJson(string file)
+        {
+            using (var r = new StreamReader(file))
+            {
+                var json = r.ReadToEnd();
+                var res = JsonConvert.DeserializeObject(json);
+                return res;
+            }
+
         }
 
         private Image GetTileImage(string mbtilefile, string level, int col, int row)
