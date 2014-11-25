@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using MBTilesServer.Filters;
 
 namespace MBTilesServer
 {
@@ -9,6 +10,8 @@ namespace MBTilesServer
             config.MapHttpAttributeRoutes();
             config.Routes.MapHttpRoute("DefaultApi", "api/{controller}/{id}", new { id = RouteParameter.Optional }
             );
+            config.Filters.Add(new ElmahErrorAttribute());
+
         }
     }
 }
