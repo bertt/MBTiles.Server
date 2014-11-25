@@ -6,7 +6,7 @@ namespace MBTilesServer.Controllers
     {
         public string GetVersion()
         {
-            return "0.1";
+            return "version 0.1";
         }
     }
 }
